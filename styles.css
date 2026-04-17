@@ -36,27 +36,48 @@ body {
 header {
   background-color: var(--bg-tab);
   border-bottom: 1px solid var(--border);
-  padding: 22px 16px 16px;
+  padding: 28px 16px 20px;
   text-align: center;
   position: sticky;
   top: 0;
   z-index: 10;
+  overflow: hidden;
+}
+
+header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 120%, rgba(138,171,204,0.08) 0%, transparent 70%);
+  pointer-events: none;
 }
 
 header h1 {
   font-family: 'Playfair Display', serif;
-  font-size: 2.2rem;
+  font-size: 2.4rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   color: var(--text);
+  position: relative;
+}
+
+header h1::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 1px;
+  background: var(--accent);
+  margin: 10px auto 0;
+  opacity: 0.6;
 }
 
 header p.tagline {
-  font-size: 0.75rem;
-  letter-spacing: 0.28em;
+  font-size: 0.7rem;
+  letter-spacing: 0.36em;
   text-transform: uppercase;
   color: var(--text-dim);
-  margin-top: 6px;
+  margin-top: 10px;
+  position: relative;
 }
 
 /* ── Tabs ───────────────────────────────────────────── */
@@ -345,6 +366,39 @@ header p.tagline {
   border-radius: 50%;
   background-color: var(--accent);
   flex-shrink: 0;
+}
+
+/* ── Postcard ───────────────────────────────────────── */
+.postcard-wrap {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.postcard-wrap svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.postcard-location {
+  position: absolute;
+  bottom: 10px;
+  right: 12px;
+  font-family: 'Playfair Display', serif;
+  font-size: 0.72rem;
+  font-style: italic;
+  letter-spacing: 0.12em;
+  color: rgba(255,255,255,0.55);
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  pointer-events: none;
+}
+
+.modal-postcard {
+  position: relative;
+  width: 100%;
+  padding-bottom: 0;
+  height: 220px;
 }
 
 /* ── Empty state ────────────────────────────────────── */
