@@ -62,7 +62,7 @@
       "name": "Old Fashioned",
       "category": "Classics",
       "photo": "photos/old-fashioned.jpg",
-      "menu_ingredients": ["Bourbon", "Demerara", "Bitters"],
+      "menu_ingredients": ["Bourbon", "Simple Syrup", "Bitters"],
       "ingredients": [
         "2 oz Bourbon",
         "¼ oz Simple syrup",
@@ -98,7 +98,7 @@
       "name": "Gin & Tonic",
       "category": "Classics",
       "photo": "photos/gin-and-tonic.jpg",
-      "menu_ingredients": ["Gin", "Tonic Water", "Lime"],
+      "menu_ingredients": ["Gin", "Tonic Water", "Lime Wedge"],
       "ingredients": [
         "2 oz Gin",
         "4 oz Tonic water",
