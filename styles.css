@@ -113,19 +113,20 @@ header p.tagline {
 
 /* ── Section divider (All tab) ──────────────────────── */
 .section-divider {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.3rem;
+  font-family: 'Lato', sans-serif;
+  font-size: 0.72rem;
   font-weight: 400;
-  font-style: italic;
-  letter-spacing: 0.01em;
-  color: var(--text);
-  padding: 6px 2px 12px;
+  font-style: normal;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--accent);
+  padding: 4px 2px 14px;
   border-bottom: 1px solid var(--border);
-  margin-bottom: 4px;
+  margin-bottom: 8px;
 }
 
 .section-divider:not(:first-child) {
-  margin-top: 28px;
+  margin-top: 48px;
 }
 
 /* ── Card ───────────────────────────────────────────── */
@@ -185,10 +186,11 @@ header p.tagline {
 }
 
 .card-source {
-  font-size: 0.82rem;
+  font-family: 'Lato', sans-serif;
+  font-size: 0.8rem;
   color: var(--accent);
   margin-top: 5px;
-  font-style: italic;
+  letter-spacing: 0.04em;
 }
 
 .card-ingredients {
@@ -300,9 +302,10 @@ header p.tagline {
 }
 
 .modal-source {
-  font-size: 0.88rem;
+  font-family: 'Lato', sans-serif;
+  font-size: 0.85rem;
   color: var(--accent);
-  font-style: italic;
+  letter-spacing: 0.04em;
   margin-bottom: 12px;
 }
 
