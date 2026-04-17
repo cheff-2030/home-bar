@@ -92,6 +92,18 @@
         "1 oz Fresh lime juice",
         "½ oz Agave syrup"
       ]
+    },
+    {
+      "id": "gin-and-tonic",
+      "name": "Gin & Tonic",
+      "category": "Classics",
+      "photo": "photos/gin-and-tonic.jpg",
+      "menu_ingredients": ["Gin", "Tonic Water", "Lime"],
+      "ingredients": [
+        "2 oz Gin",
+        "4 oz Tonic water",
+        "1 Lime wedge"
+      ]
     }
   ]
 }
