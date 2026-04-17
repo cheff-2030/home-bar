@@ -1,0 +1,97 @@
+{
+  "cocktails": [
+    {
+      "id": "japanese-cocktail-2",
+      "name": "Japanese Cocktail #2",
+      "category": "Signatures",
+      "source_bar": "Kumiko",
+      "source_city": "Chicago",
+      "photo": "photos/japanese-cocktail-2.jpg",
+      "menu_ingredients": ["Cognac", "Shochu", "Orgeat", "Angostura"],
+      "ingredients": [
+        "1 oz Cognac",
+        "1 oz Shochu",
+        "½ oz Orgeat",
+        "2 dashes Angostura bitters"
+      ]
+    },
+    {
+      "id": "chocolate-valencia",
+      "name": "Chocolate Valencia",
+      "category": "Signatures",
+      "source_bar": "Marty's Martini Bar",
+      "source_city": "Chicago",
+      "photo": "photos/chocolate-valencia.jpg",
+      "menu_ingredients": ["Vodka", "Chocolate Baileys", "Dry Curaçao"],
+      "ingredients": [
+        "1 oz Vodka",
+        "1 oz Chocolate Baileys",
+        "1 oz Dry Curaçao"
+      ]
+    },
+    {
+      "id": "snap-judgment",
+      "name": "Snap Judgment",
+      "category": "Signatures",
+      "source_bar": "The Chandelier",
+      "source_city": "Las Vegas",
+      "photo": "photos/snap-judgment.jpg",
+      "menu_ingredients": ["Gin", "Italicus", "Blanc Vermouth", "Gentian"],
+      "ingredients": [
+        "1 oz Gin",
+        "1 oz Italicus",
+        "½ oz Blanc vermouth",
+        "½ oz Saler's"
+      ]
+    },
+    {
+      "id": "grow-the-pie",
+      "name": "Grow the Pie",
+      "category": "Originals",
+      "photo": "photos/grow-the-pie.jpg",
+      "menu_ingredients": ["Mezcal", "Italicus", "Montenegro", "Blanc Vermouth"],
+      "ingredients": [
+        "1 oz Mezcal",
+        "1 oz Italicus",
+        "½ oz Montenegro",
+        "¼ oz Blanc vermouth"
+      ]
+    },
+    {
+      "id": "old-fashioned",
+      "name": "Old Fashioned",
+      "category": "Classics",
+      "photo": "photos/old-fashioned.jpg",
+      "menu_ingredients": ["Bourbon", "Demerara", "Bitters"],
+      "ingredients": [
+        "2 oz Bourbon",
+        "¼ oz Simple syrup",
+        "3 dashes Bitters"
+      ]
+    },
+    {
+      "id": "negroni",
+      "name": "Negroni",
+      "category": "Classics",
+      "photo": "photos/negroni.jpg",
+      "menu_ingredients": ["Gin", "Sweet Vermouth", "Campari"],
+      "ingredients": [
+        "1 oz Gin",
+        "1 oz Sweet vermouth",
+        "1 oz Campari"
+      ]
+    },
+    {
+      "id": "tommys-margarita",
+      "name": "Tommy's Margarita",
+      "category": "Classics",
+      "photo": "photos/tommys-margarita.jpg",
+      "menu_ingredients": ["Tequila", "Lime", "Agave"],
+      "ingredients": [
+        "2 oz Blanco tequila",
+        "1 oz Fresh lime juice",
+        "½ oz Agave syrup"
+      ]
+    }
+  ]
+}
