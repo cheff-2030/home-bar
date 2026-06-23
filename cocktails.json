@@ -3,7 +3,7 @@
     {
       "id": "japanese-cocktail-2",
       "name": "Japanese Cocktail #2",
-      "category": "Signatures",
+      "category": "Borrowed",
       "source_bar": "Kumiko",
       "source_city": "Chicago",
       "photo": "photos/japanese-cocktail-2.jpg",
@@ -18,7 +18,7 @@
     {
       "id": "chocolate-valencia",
       "name": "Chocolate Valencia",
-      "category": "Signatures",
+      "category": "Borrowed",
       "source_bar": "Marty's Martini Bar",
       "source_city": "Chicago",
       "photo": "photos/chocolate-valencia.jpg",
@@ -32,7 +32,7 @@
     {
       "id": "snap-judgment",
       "name": "Snap Judgment",
-      "category": "Signatures",
+      "category": "Borrowed",
       "source_bar": "The Chandelier",
       "source_city": "Las Vegas",
       "photo": "photos/snap-judgment.jpg",
