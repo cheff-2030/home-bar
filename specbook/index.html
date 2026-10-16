@@ -1,0 +1,1346 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Spec Book">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#EDF0EE" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0F1618" media="(prefers-color-scheme: dark)">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<title>Spec Book</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600;700&family=Young+Serif&display=swap">
+<style>
+/* Layout: one fixed scroll surface (no page drift or rubber-banding); detail, editor and settings are full-screen sheets */
+:root{
+  --bg:#EDF0EE; --surface:#F9FBFA; --ink:#17242A; --muted:#56676C; --line:#D2DAD7;
+  --chip:#E0E7E4; --tint:#DCE5E1; --accent:#A3202C; --on-accent:#FFFFFF; --brass:#A8741B;
+  --ok:#2F7D5B; --shadow:rgb(23 36 42 / .28);
+  --display:"Young Serif", Georgia, "Times New Roman", serif;
+  --body:"Instrument Sans", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  --r:14px;
+  --gut-l:max(16px, env(safe-area-inset-left, 0px));
+  --gut-r:max(16px, env(safe-area-inset-right, 0px));
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0F1618; --surface:#172124; --ink:#E4EBE8; --muted:#93A3A1; --line:#283437;
+    --chip:#1F2B2E; --tint:#1B2629; --accent:#E5545E; --on-accent:#1A090B; --brass:#D9A64A;
+    --ok:#5BBE8F; --shadow:rgb(0 0 0 / .6); color-scheme:dark;
+  }
+}
+
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;overflow:hidden;overscroll-behavior:none;background:var(--bg)}
+body{color:var(--ink);font:400 16px/1.45 var(--body);-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%}
+button,input,select,textarea{font:inherit;color:inherit}
+button,label,a{touch-action:manipulation}
+button{cursor:pointer}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;padding:0;margin:-1px}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+
+/* The one scroll surface. Fixed to the screen so the page itself can never be dragged sideways or bounced. */
+.screen{position:fixed;inset:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:none;-webkit-overflow-scrolling:touch;background:var(--bg)}
+.wrap{width:100%;max-width:720px;margin:0 auto;padding-left:var(--gut-l);padding-right:var(--gut-r)}
+
+/* Masthead */
+.masthead{padding-top:calc(18px + env(safe-area-inset-top, 0px));padding-bottom:4px}
+.mast-row{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.eyebrow{margin:0;font:500 11px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+h1{margin:8px 0 0;font:400 42px/1 var(--display);letter-spacing:-.01em}
+.mast-tools{display:flex;align-items:center;gap:8px;flex:none}
+.unit-toggle{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:2px;background:var(--surface)}
+.unit-toggle button{border:0;background:none;padding:6px 12px;border-radius:999px;font:500 13px/1 var(--mono);color:var(--muted)}
+.unit-toggle button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.gear{border:1px solid var(--line);background:var(--surface);width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:var(--muted);padding:0}
+.gear svg{width:17px;height:17px}
+.meta-line{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin-top:10px}
+.tally{margin:0;font:400 13px/1.3 var(--mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.sync{display:inline-flex;align-items:center;gap:7px;border:0;background:none;padding:2px 0;font:400 12px/1.3 var(--mono);color:var(--muted);text-align:left}
+.sync::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--ok);flex:none}
+.sync[data-state="saving"]::before{background:var(--brass);animation:pulse 1s ease-in-out infinite}
+.sync[data-state="waiting"]::before{background:var(--brass)}
+.sync[data-state="err"]{color:var(--accent)}
+.sync[data-state="err"]::before{background:var(--accent)}
+@keyframes pulse{50%{opacity:.3}}
+
+/* Search bar */
+.bar{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid transparent;transition:border-color .2s}
+.bar.stuck{border-bottom-color:var(--line)}
+.bar-inner{display:grid;gap:10px;padding-top:12px;padding-bottom:10px}
+.search{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:0 8px 0 12px;height:46px;min-width:0}
+.search svg{width:18px;height:18px;color:var(--muted);flex:none}
+.search input{flex:1;min-width:0;border:0;background:none;outline:none;font-size:16px;height:100%;padding:0}
+.search input::-webkit-search-cancel-button{display:none}
+.round-x{border:0;background:var(--chip);width:26px;height:26px;border-radius:50%;display:grid;place-items:center;color:var(--muted);font-size:17px;line-height:1;flex:none;padding:0}
+.controls{display:flex;gap:8px;align-items:center;justify-content:space-between;min-width:0}
+.scope{display:flex;gap:2px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;min-width:0;background:var(--chip);border-radius:10px;padding:2px}
+.scope::-webkit-scrollbar{display:none}
+.scope button{border:0;background:none;padding:7px 10px;border-radius:8px;font:500 13px/1 var(--body);color:var(--muted);white-space:nowrap}
+.scope button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px var(--shadow)}
+.sort{position:relative;flex:none}
+.sort::after{content:"";position:absolute;right:11px;top:50%;width:6px;height:6px;border-right:1.5px solid var(--muted);border-bottom:1.5px solid var(--muted);transform:translateY(-70%) rotate(45deg);pointer-events:none}
+.sort select{appearance:none;-webkit-appearance:none;border:1px solid var(--line);background:var(--surface);border-radius:10px;height:34px;padding:0 28px 0 10px;font-size:16px;font-weight:500;max-width:9.5em}
+.chips{display:flex;gap:6px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;padding-bottom:2px;min-width:0}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 12px;font:500 13px/1 var(--body);color:var(--ink);white-space:nowrap}
+.chip .n{font:400 11px/1 var(--mono);color:var(--muted);margin-left:5px}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.chip[aria-pressed="true"] .n{color:inherit;opacity:.7}
+.chip.tag::before{content:"#";color:var(--muted);margin-right:1px}
+.chip.tag[aria-pressed="true"]::before{color:inherit;opacity:.7}
+.chip-sep{flex:none;width:1px;background:var(--line);margin:5px 3px}
+
+/* List */
+.list-area{padding-bottom:calc(110px + env(safe-area-inset-bottom, 0px))}
+.note{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:4px 0 10px;font:400 13px/1.3 var(--mono);color:var(--muted)}
+.link-sm{border:0;background:none;color:var(--accent);font:500 14px/1 var(--body);padding:6px 0}
+.list{list-style:none;margin:6px 0 0;padding:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.list li+li{border-top:1px solid var(--line)}
+.row{display:grid;grid-template-columns:64px minmax(0,1fr) 10px;gap:14px;align-items:center;width:100%;text-align:left;border:0;background:none;padding:12px 14px 12px 12px}
+.row:active{background:var(--chip)}
+.thumb{width:64px;height:64px;border-radius:10px;overflow:hidden;background:var(--tint);display:grid;place-items:center;color:var(--muted)}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb svg{width:30px;height:35px}
+.row-main{min-width:0;display:grid;gap:3px}
+.row-meta{font:500 11px/1.2 var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);overflow-wrap:anywhere}
+.row-name{font:400 19px/1.2 var(--display);overflow-wrap:anywhere}
+.row-ing{font-size:14px;line-height:1.35;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.row-rate{display:flex;align-items:center;gap:7px;font:400 12px/1 var(--mono);color:var(--muted);font-variant-numeric:tabular-nums;margin-top:3px}
+.chev{width:8px;height:8px;border-right:1.6px solid var(--muted);border-top:1.6px solid var(--muted);transform:rotate(45deg);opacity:.7}
+img[data-photo]:not([src]){visibility:hidden}
+
+.stars{position:relative;display:inline-block;line-height:1;letter-spacing:1px;white-space:nowrap;font-family:-apple-system,"Segoe UI Symbol",sans-serif}
+.stars .base{color:var(--line)}
+.stars .fill{position:absolute;inset:0 auto 0 0;overflow:hidden;color:var(--brass)}
+.stars.sm{font-size:13px}
+.stars.lg{font-size:22px;letter-spacing:2px}
+
+.empty{text-align:center;padding:56px 12px;color:var(--muted)}
+.empty svg{width:56px;height:64px;color:var(--muted);opacity:.8}
+.empty h2{font:400 26px/1.15 var(--display);color:var(--ink);margin:14px 0 8px;text-wrap:balance}
+.empty p{margin:0 auto 16px;max-width:30ch}
+
+.fab{position:fixed;right:calc(18px + env(safe-area-inset-right, 0px));bottom:calc(18px + env(safe-area-inset-bottom, 0px));z-index:8;border:0;background:var(--accent);color:var(--on-accent);border-radius:999px;padding:0 22px 0 18px;height:54px;font:600 16px/1 var(--body);display:flex;align-items:center;gap:8px;box-shadow:0 10px 26px -8px var(--shadow)}
+.fab span{font-size:24px;font-weight:400;line-height:1;margin-top:-2px}
+.fab:active{transform:scale(.97)}
+
+/* Sheets */
+.sheet{position:fixed;inset:0;z-index:20;background:var(--bg);overflow-x:hidden;overflow-y:auto;overscroll-behavior:none;-webkit-overflow-scrolling:touch;transform:translateY(100%);visibility:hidden;transition:transform .34s cubic-bezier(.2,.8,.2,1),visibility 0s linear .34s}
+.sheet.open{transform:none;visibility:visible;transition:transform .34s cubic-bezier(.2,.8,.2,1),visibility 0s}
+#editor{z-index:30}
+#settings{z-index:40}
+.sheet-head{position:sticky;top:0;z-index:3;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;background:var(--bg);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top, 0px);padding-left:max(6px, env(safe-area-inset-left, 0px));padding-right:max(6px, env(safe-area-inset-right, 0px))}
+.sheet-head > :first-child{justify-self:start}
+.sheet-head > :last-child{justify-self:end}
+.link{border:0;background:none;color:var(--accent);font:500 17px/1 var(--body);padding:16px 10px}
+.link.strong{font-weight:700}
+.link[disabled]{opacity:.4}
+.sheet-title{font:600 15px/1.2 var(--body);text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:46vw}
+.sheet-body{padding-bottom:calc(56px + env(safe-area-inset-bottom, 0px))}
+
+/* Detail */
+.gallery-wrap{max-width:720px;margin:0 auto;position:relative}
+.gallery{display:flex;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scrollbar-width:none;background:var(--tint)}
+.gallery::-webkit-scrollbar{display:none}
+.gallery img{flex:0 0 100%;width:100%;max-width:100%;aspect-ratio:4/5;max-height:64vh;object-fit:cover;scroll-snap-align:center;display:block}
+.dots{position:absolute;left:0;right:0;bottom:12px;display:flex;gap:6px;justify-content:center;pointer-events:none}
+.dots span{width:7px;height:7px;border-radius:50%;background:var(--surface);opacity:.55;box-shadow:0 0 0 1px var(--shadow)}
+.dots span.on{opacity:1}
+.hero-glass{display:grid;place-items:center;aspect-ratio:16/8;max-width:100%;background:var(--tint);color:var(--muted)}
+.hero-glass svg{width:64px;height:74px;opacity:.85}
+.d-head{padding-top:20px}
+.d-name{font:400 clamp(32px,9vw,46px)/1.04 var(--display);margin:8px 0 12px;letter-spacing:-.01em;text-wrap:balance;overflow-wrap:anywhere}
+.d-rate{display:flex;align-items:center;gap:8px;font:400 13px/1 var(--mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:20px 0 0}
+.fact{background:var(--surface);padding:11px 13px;min-width:0;margin:0}
+.fact:last-child:nth-child(odd){grid-column:1/-1}
+.fact dt{font:500 10.5px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.fact dd{margin:6px 0 0;font-size:15px;overflow-wrap:anywhere}
+.sec{font:500 11px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:30px 0 12px}
+.spec{list-style:none;margin:0;padding:0;border-top:1.5px solid var(--ink)}
+.spec li{display:grid;grid-template-columns:7.2em minmax(0,1fr);gap:14px;padding:11px 0;border-bottom:1px solid var(--line);align-items:baseline}
+.spec .amt{font:500 15px/1.3 var(--mono);font-variant-numeric:tabular-nums;text-align:right;color:var(--accent)}
+.spec .ing{font-size:17px;line-height:1.3;border:0;background:none;text-align:left;padding:0;overflow-wrap:anywhere}
+.spec .ing:active{color:var(--accent)}
+.steps{margin:0;padding-left:1.5em;max-width:65ch}
+.steps li{padding-left:6px;margin-bottom:9px}
+.steps li::marker{font:500 13px var(--mono);color:var(--muted)}
+.prose{white-space:pre-wrap;margin:0;max-width:65ch;overflow-wrap:anywhere}
+.tagrow{display:flex;flex-wrap:wrap;gap:6px}
+.rate-summary{display:flex;align-items:center;gap:14px}
+.rate-big{font:400 46px/1 var(--display);font-variant-numeric:tabular-nums}
+.rate-list{list-style:none;padding:0;margin:16px 0 0;border-top:1px solid var(--line)}
+.rate-list li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px 10px;padding:11px 0;border-bottom:1px solid var(--line);align-items:center}
+.r-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+.r-who{font-weight:600;overflow-wrap:anywhere}
+.r-side{display:flex;align-items:center;gap:10px;font:400 12px/1 var(--mono);color:var(--muted)}
+.r-note{grid-column:1/-1;margin:0;color:var(--muted);font-size:15px;overflow-wrap:anywhere}
+.r-del{border:0;background:none;color:var(--muted);font:500 12px/1 var(--body);padding:6px 0}
+.r-del.armed,.btn.armed{color:var(--accent)}
+.rate-form{display:grid;gap:12px;margin-top:18px;padding:16px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.rate-form h4{margin:0;font:400 19px/1.2 var(--display)}
+.star-input{display:flex;gap:2px}
+.star-input button{border:0;background:none;font-size:34px;line-height:1;color:var(--line);padding:2px 5px;font-family:-apple-system,"Segoe UI Symbol",sans-serif;transition:transform .12s}
+.star-input button.on{color:var(--brass)}
+.star-input button:active{transform:scale(.88)}
+.d-foot{display:flex;flex-wrap:wrap;gap:10px;margin-top:34px;align-items:center}
+.stamp{width:100%;margin:6px 0 0;font:400 12px/1.4 var(--mono);color:var(--muted)}
+
+/* Forms */
+.btn{border:0;border-radius:11px;padding:13px 18px;font:600 16px/1 var(--body);background:var(--accent);color:var(--on-accent)}
+.btn.ghost{background:var(--chip);color:var(--ink)}
+.btn.outline{background:none;color:var(--accent);border:1px solid var(--line)}
+.btn.armed{border-color:var(--accent)}
+.btn[disabled]{opacity:.5}
+.field{display:grid;gap:7px;min-width:0}
+.field > span{font:500 10.5px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.field input,.field textarea,.field select{width:100%;min-width:0;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:11px 12px;font-size:16px;line-height:1.35;outline:none}
+.rate-form input{background:var(--bg)}
+.field input:focus,.field textarea:focus,.ing-row input:focus,.ing-row select:focus{border-color:var(--accent)}
+textarea{resize:vertical;min-height:96px}
+.field-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.ed-group{display:grid;gap:16px;padding-top:20px}
+.ed-section{margin-top:28px;display:grid;gap:10px}
+.ed-section .sec{margin:0}
+.hint{margin:0;font-size:13px;color:var(--muted)}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.ing-head,.ing-row{display:grid;grid-template-columns:4.4em 6.6em minmax(0,1fr) 30px;gap:6px;align-items:center}
+.ing-head{font:500 10px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:0 2px}
+.ing-head span:first-child{text-align:right;padding-right:10px}
+.ing-row input,.ing-row select{width:100%;min-width:0;border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:10px 8px;font-size:16px;outline:none}
+.ing-row select{appearance:none;-webkit-appearance:none;padding-right:6px}
+.ing-amt{font-family:var(--mono);text-align:right;font-variant-numeric:tabular-nums}
+.ing-del{border:0;background:none;color:var(--muted);font-size:22px;line-height:1;padding:0;height:40px}
+.add-row{border:1px dashed var(--line);background:none;border-radius:10px;width:100%;padding:12px;color:var(--accent);font:600 15px/1 var(--body)}
+.ph-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
+.ph{position:relative;aspect-ratio:1;max-width:100%;border-radius:10px;overflow:hidden;background:var(--tint)}
+.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.ph .x{position:absolute;top:5px;right:5px;width:26px;height:26px;border-radius:50%;border:0;background:rgb(0 0 0 / .6);color:#fff;font-size:16px;line-height:1;display:grid;place-items:center;padding:0}
+.ph .cover{position:absolute;left:5px;bottom:5px;background:rgb(0 0 0 / .6);color:#fff;font:500 10px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;padding:4px 6px;border-radius:5px}
+.ph .mk{position:absolute;inset:0;border:0;background:none;padding:0}
+.ph.loading img{opacity:.45}
+.ph.loading::after{content:"";position:absolute;left:50%;top:50%;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;border:2.5px solid var(--surface);border-top-color:var(--accent);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ph.add{display:grid;place-items:center;border:1.5px dashed var(--line);background:none;color:var(--accent);font:600 14px/1.2 var(--body);cursor:pointer;text-align:center}
+.tag-input{display:flex;flex-wrap:wrap;gap:6px;align-items:center;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:6px}
+.tag-input input{flex:1;min-width:8em;border:0;background:none;outline:none;padding:6px;font-size:16px}
+.tagchip{display:inline-flex;align-items:center;gap:2px;background:var(--chip);border-radius:999px;padding:4px 4px 4px 10px;font-size:14px}
+.tagchip button{border:0;background:none;color:var(--muted);font-size:17px;line-height:1;padding:2px 6px}
+
+/* Setup and settings */
+.setup{padding-bottom:calc(48px + env(safe-area-inset-bottom, 0px))}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;margin-top:22px;display:grid;gap:14px}
+.card h2{margin:0;font:400 26px/1.15 var(--display);text-wrap:balance}
+.card p{margin:0;max-width:60ch}
+.steps-setup{margin:0;padding-left:1.4em;display:grid;gap:10px}
+.steps-setup li::marker{font:500 13px var(--mono);color:var(--accent)}
+.code{font:500 14px var(--mono);background:var(--chip);border-radius:6px;padding:1px 6px;overflow-wrap:anywhere}
+.set-list{margin:0;display:grid;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.set-list > div{background:var(--surface);padding:12px 14px;display:grid;gap:4px;min-width:0}
+.set-list dt{font:500 10.5px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.set-list dd{margin:0;overflow-wrap:anywhere}
+.stack{display:grid;gap:10px}
+
+.toast{position:fixed;left:16px;right:16px;bottom:calc(86px + env(safe-area-inset-bottom, 0px));z-index:60;display:flex;justify-content:center;pointer-events:none;opacity:0;transform:translateY(12px);transition:opacity .2s,transform .2s}
+.toast span{background:var(--ink);color:var(--bg);padding:11px 16px;border-radius:12px;font-size:15px;text-align:center;max-width:100%}
+.toast.show{opacity:1;transform:none}
+
+@media (prefers-reduced-motion: reduce){
+  .sheet,.sheet.open,.toast,.bar{transition:none}
+  .ph.loading::after,.sync[data-state="saving"]::before{animation-duration:2s}
+}
+@media (min-width:700px){
+  .gallery-wrap{padding-top:16px}
+  .gallery,.hero-glass{border-radius:var(--r)}
+}
+</style>
+</head>
+<body>
+
+<!-- Main screen -->
+<div class="screen" id="main-screen" hidden>
+  <header class="masthead wrap" id="masthead">
+    <div class="mast-row">
+      <div>
+        <p class="eyebrow">The River Bar</p>
+        <h1>Spec Book</h1>
+      </div>
+      <div class="mast-tools">
+        <div class="unit-toggle" role="group" aria-label="Measurement units">
+          <button type="button" data-unit="oz" aria-pressed="true">oz</button><button type="button" data-unit="ml" aria-pressed="false">ml</button>
+        </div>
+        <button type="button" class="gear" id="open-settings" aria-label="Settings">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M3 6h14M3 14h14"/><circle cx="7" cy="6" r="2.2" fill="var(--surface)"/><circle cx="13" cy="14" r="2.2" fill="var(--surface)"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="meta-line">
+      <p class="tally" id="tally">Opening the book…</p>
+      <button type="button" class="sync" id="sync" data-state="ok">Loading</button>
+    </div>
+  </header>
+
+  <div class="bar" id="bar">
+    <div class="wrap bar-inner">
+      <label class="search" for="q">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="8.5" cy="8.5" r="6"/><path d="M13 13l5 5"/></svg>
+        <span class="sr">Search specs</span>
+        <input id="q" type="search" placeholder="Search name, spirit, garnish…" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="search">
+        <button type="button" class="round-x" id="q-clear" aria-label="Clear search" hidden>×</button>
+      </label>
+      <div class="controls">
+        <div class="scope" id="scope" role="group" aria-label="Search in">
+          <button type="button" data-scope="all" aria-pressed="true">All</button>
+          <button type="button" data-scope="name" aria-pressed="false">Name</button>
+          <button type="button" data-scope="type" aria-pressed="false">Type</button>
+          <button type="button" data-scope="ingredient" aria-pressed="false">Ingredient</button>
+          <button type="button" data-scope="tag" aria-pressed="false">Tag</button>
+        </div>
+        <label class="sort" for="sort"><span class="sr">Sort by</span>
+          <select id="sort">
+            <option value="name">A–Z</option>
+            <option value="rating">Top rated</option>
+            <option value="count">Most rated</option>
+            <option value="newest">Newest</option>
+            <option value="edited">Last edited</option>
+          </select>
+        </label>
+      </div>
+      <div class="chips" id="chips" hidden></div>
+    </div>
+  </div>
+
+  <div class="wrap list-area" id="list-area">
+    <div class="note" id="note" hidden></div>
+    <ul class="list" id="list" hidden></ul>
+    <div class="empty" id="empty"></div>
+  </div>
+</div>
+
+<button type="button" class="fab" id="fab" hidden><span aria-hidden="true">+</span>New spec</button>
+
+<!-- First-run setup -->
+<div class="screen" id="setup-screen" hidden>
+  <div class="wrap setup">
+    <header class="masthead">
+      <p class="eyebrow">The River Bar</p>
+      <h1>Spec Book</h1>
+    </header>
+    <form class="card" id="setup-form" novalidate>
+      <h2>Connect your spec book</h2>
+      <p>Specs, ratings and photos save to a private GitHub repository. Clearing Safari, private browsing or a new phone can’t lose them. This takes about two minutes, once.</p>
+      <ol class="steps-setup">
+        <li>Create a <strong>private</strong> repository named <span class="code">spec-book-data</span> and tick “Add a README”. <a href="https://github.com/new" target="_blank" rel="noopener">Open github.com/new</a></li>
+        <li>Create a fine-grained token. Set expiration to the longest option, repository access to “Only select repositories” → <span class="code">spec-book-data</span>, and Repository permissions → Contents to “Read and write”. <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Open token settings</a></li>
+        <li>Paste the token below. It stays in this app and can only touch that one repository.</li>
+      </ol>
+      <label class="field" for="setup-repo"><span>Repository</span><input id="setup-repo" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="your-username/spec-book-data"></label>
+      <label class="field" for="setup-token"><span>Token</span><input id="setup-token" type="password" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="github_pat_…"></label>
+      <button type="submit" class="btn" id="setup-go">Connect</button>
+      <p class="hint" id="setup-msg" role="status" aria-live="polite"></p>
+    </form>
+  </div>
+</div>
+
+<!-- Detail -->
+<section class="sheet" id="detail" role="dialog" aria-modal="true" aria-labelledby="detail-headname" aria-hidden="true">
+  <div class="sheet-head">
+    <button type="button" class="link" id="detail-close">‹ Specs</button>
+    <span class="sheet-title" id="detail-headname"></span>
+    <button type="button" class="link" id="detail-edit">Edit</button>
+  </div>
+  <div class="sheet-body" id="detail-body">
+    <div id="d-main"></div>
+    <div class="wrap">
+      <h3 class="sec">Ratings</h3>
+      <div id="d-ratings"></div>
+      <form class="rate-form" id="rate-form" novalidate>
+        <h4>Log a rating</h4>
+        <div class="star-input" id="star-input" role="radiogroup" aria-label="Score out of 5">
+          <button type="button" role="radio" aria-checked="false" data-star="1" aria-label="1 star">★</button>
+          <button type="button" role="radio" aria-checked="false" data-star="2" aria-label="2 stars">★</button>
+          <button type="button" role="radio" aria-checked="false" data-star="3" aria-label="3 stars">★</button>
+          <button type="button" role="radio" aria-checked="false" data-star="4" aria-label="4 stars">★</button>
+          <button type="button" role="radio" aria-checked="false" data-star="5" aria-label="5 stars">★</button>
+        </div>
+        <div class="field-row">
+          <label class="field" for="rate-who"><span>Who</span><input id="rate-who" list="dl-raters" autocomplete="off" placeholder="Name"></label>
+          <label class="field" for="rate-note"><span>Note</span><input id="rate-note" autocomplete="off" placeholder="Optional"></label>
+        </div>
+        <button type="submit" class="btn" id="rate-submit">Add rating</button>
+      </form>
+      <div id="d-foot"></div>
+    </div>
+  </div>
+</section>
+
+<!-- Editor -->
+<section class="sheet" id="editor" role="dialog" aria-modal="true" aria-labelledby="ed-title" aria-hidden="true">
+  <form id="ed-form" novalidate>
+    <div class="sheet-head">
+      <button type="button" class="link" id="ed-cancel">Cancel</button>
+      <span class="sheet-title" id="ed-title">New spec</span>
+      <button type="submit" class="link strong" id="ed-save">Save</button>
+    </div>
+    <div class="sheet-body wrap" id="ed-body"></div>
+  </form>
+</section>
+
+<!-- Settings -->
+<section class="sheet" id="settings" role="dialog" aria-modal="true" aria-labelledby="set-title" aria-hidden="true">
+  <div class="sheet-head">
+    <span></span>
+    <span class="sheet-title" id="set-title">Settings</span>
+    <button type="button" class="link strong" id="set-close">Done</button>
+  </div>
+  <div class="sheet-body wrap" id="set-body"></div>
+</section>
+
+<div class="toast" id="toast" role="status" aria-live="polite"><span id="toast-text"></span></div>
+
+<datalist id="dl-types"></datalist>
+<datalist id="dl-glass"></datalist>
+<datalist id="dl-ice"></datalist>
+<datalist id="dl-garnish"></datalist>
+<datalist id="dl-ings"></datalist>
+<datalist id="dl-tags"></datalist>
+<datalist id="dl-raters"></datalist>
+
+<script>
+(() => {
+"use strict";
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const norm = s => String(s ?? "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+const clone = o => JSON.parse(JSON.stringify(o));
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("sb." + k); return v == null ? d : v; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem("sb." + k, v); } catch {} },
+  del(k) { try { localStorage.removeItem("sb." + k); } catch {} },
+  getJSON(k) { try { return JSON.parse(this.get(k, "null")); } catch { return null; } },
+  setJSON(k, v) { this.set(k, JSON.stringify(v)); }
+};
+
+/* ================= data constants ================= */
+const DATA_PATH = "specbook.json";
+const TYPES = ["Sour", "Highball", "Spritz", "Stirred", "Old Fashioned", "Martini", "Negroni riff", "Fizz", "Collins", "Tiki", "Julep", "Smash", "Flip", "Punch", "Low-ABV", "Zero-proof"];
+const GLASSES = ["Coupe", "Nick & Nora", "Martini", "Rocks", "Double rocks", "Highball", "Collins", "Wine glass", "Flute", "Julep cup", "Mug", "Tiki mug"];
+const ICES = ["Large cube", "Cubed", "Crushed", "Pebble", "Collins spear", "Up (no ice)"];
+const METHODS = ["Shaken", "Stirred", "Built", "Blended", "Thrown", "Swizzled"];
+const UNITS = ["oz", "ml", "dash", "barspoon", "tsp", "drop", "top", "rinse", "whole", "pinch", ""];
+const SEED = () => {
+  const t = "2026-10-16T17:30:00.000Z";
+  const base = { notes: "", source: "River Bar classics menu", photos: [], ratings: [], createdAt: t, updatedAt: t };
+  return [
+    { ...base, id: "negroni", name: "Negroni", type: "Stirred", method: "Stirred", glass: "Rocks", ice: "Large cube", garnish: "Orange peel",
+      ingredients: [{ amount: 1, unit: "oz", name: "Gin" }, { amount: 1, unit: "oz", name: "Campari" }, { amount: 1, unit: "oz", name: "Sweet vermouth" }],
+      steps: ["Add everything to a mixing glass with ice.", "Stir until well chilled, about 20 seconds.", "Strain over a large cube.", "Express the orange peel over the top and drop it in."],
+      tags: ["classic", "bitter", "gin"] },
+    { ...base, id: "tommys-margarita", name: "Tommy's Margarita", type: "Sour", method: "Shaken", glass: "Rocks", ice: "Cubed", garnish: "Lime wheel",
+      ingredients: [{ amount: 2, unit: "oz", name: "Blanco tequila" }, { amount: 1, unit: "oz", name: "Lime juice" }, { amount: 0.5, unit: "oz", name: "Agave syrup (1:1)" }],
+      steps: ["Shake hard with ice for 10 to 12 seconds.", "Strain over fresh ice.", "Garnish with a lime wheel."],
+      tags: ["classic", "tequila", "citrus"] },
+    { ...base, id: "old-fashioned", name: "Old Fashioned", type: "Old Fashioned", method: "Stirred", glass: "Rocks", ice: "Large cube", garnish: "Orange peel",
+      ingredients: [{ amount: 2, unit: "oz", name: "Bourbon or rye" }, { amount: 0.25, unit: "oz", name: "Simple syrup" }, { amount: 2, unit: "dash", name: "Angostura bitters" }, { amount: 1, unit: "dash", name: "Orange bitters" }],
+      steps: ["Add everything to a mixing glass with ice.", "Stir until well chilled and slightly diluted.", "Strain over a large cube.", "Express the orange peel and drop it in."],
+      tags: ["classic", "whiskey"] },
+    { ...base, id: "gin-and-tonic", name: "Gin & Tonic", type: "Highball", method: "Built", glass: "Highball", ice: "Cubed", garnish: "Lime wedge",
+      ingredients: [{ amount: 2, unit: "oz", name: "Gin" }, { amount: null, unit: "top", name: "Tonic water" }],
+      steps: ["Fill a highball with ice.", "Add the gin, then top with cold tonic.", "Give one gentle stir and garnish."],
+      tags: ["classic", "gin", "highball"] }
+  ];
+};
+
+/* ================= state ================= */
+const S = {
+  recipes: [], loaded: false,
+  q: "", scope: "all", sort: store.get("sort", "name"), type: null, tag: null,
+  unit: store.get("unit", "oz") === "ml" ? "ml" : "oz",
+  openId: null
+};
+let CFG = store.getJSON("cfg");               // {owner, repo, token}
+let base = null;                              // last copy confirmed on GitHub: {version, recipes}
+let ops = [];                                 // changes made here, not yet on GitHub
+const SY = { busy: false, again: false, err: null, at: null };
+let ED = null;
+let STAR = 0;
+
+/* ================= GitHub ================= */
+const API = "https://api.github.com";
+const encPath = p => p.split("/").map(encodeURIComponent).join("/");
+class GhError extends Error { constructor(kind, status, msg) { super(msg || kind); this.kind = kind; this.status = status; } }
+async function gh(path, opts = {}, cfg = CFG) {
+  let res;
+  try {
+    res = await fetch(API + path, {
+      ...opts, cache: "no-store",
+      headers: { Accept: "application/vnd.github+json", Authorization: "Bearer " + cfg.token, "X-GitHub-Api-Version": "2022-11-28", ...(opts.headers || {}) }
+    });
+  } catch { throw new GhError("offline", 0); }
+  return res;
+}
+function failFrom(res) {
+  if (res.status === 401) return new GhError("auth", 401);
+  if (res.status === 403) return new GhError("forbidden", 403);
+  if (res.status === 404) return new GhError("missing", 404);
+  return new GhError("http", res.status);
+}
+function b64enc(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(bin);
+}
+function b64dec(b64) {
+  const bin = atob(String(b64).replace(/\s/g, ""));
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
+}
+const blobToB64 = blob => new Promise((res, rej) => {
+  const r = new FileReader();
+  r.onload = () => res(String(r.result).split(",")[1] || "");
+  r.onerror = () => rej(r.error);
+  r.readAsDataURL(blob);
+});
+// All writes go through one line, because GitHub refuses two commits racing on the same branch.
+let wchain = Promise.resolve();
+const serial = fn => { const p = wchain.then(fn, fn); wchain = p.catch(() => {}); return p; };
+
+async function pullData() {
+  const res = await gh(`/repos/${CFG.owner}/${CFG.repo}/contents/${DATA_PATH}`);
+  if (res.status === 404) {
+    const repo = await gh(`/repos/${CFG.owner}/${CFG.repo}`);
+    if (!repo.ok) throw failFrom(repo);
+    return { data: null, sha: null };
+  }
+  if (!res.ok) throw failFrom(res);
+  const j = await res.json();
+  return { data: JSON.parse(b64dec(j.content)), sha: j.sha };
+}
+async function pushData(data, sha, message) {
+  const res = await gh(`/repos/${CFG.owner}/${CFG.repo}/contents/${DATA_PATH}`, {
+    method: "PUT",
+    body: JSON.stringify({ message, content: b64enc(JSON.stringify(data, null, 1) + "\n"), ...(sha ? { sha } : {}) })
+  });
+  if (res.status === 409 || res.status === 422) return { conflict: true };
+  if (!res.ok) throw failFrom(res);
+  const j = await res.json();
+  return { sha: j.content.sha };
+}
+
+/* ================= changes and sync ================= */
+function applyOp(recipes, op) {
+  const i = recipes.findIndex(r => r.id === op.id);
+  switch (op.t) {
+    case "create": if (i < 0) recipes.push(clone(op.recipe)); break;
+    case "edit": if (i >= 0) recipes[i] = { ...recipes[i], ...clone(op.fields) }; break;
+    case "delete": if (i >= 0) recipes.splice(i, 1); break;
+    case "rate":
+      if (i >= 0) {
+        const rs = recipes[i].ratings || [];
+        if (!rs.some(x => x.id === op.rating.id)) recipes[i] = { ...recipes[i], ratings: [...rs, clone(op.rating)] };
+      }
+      break;
+    case "unrate": if (i >= 0) recipes[i] = { ...recipes[i], ratings: (recipes[i].ratings || []).filter(x => x.id !== op.ratingId) }; break;
+  }
+  return recipes;
+}
+function commitMsg(batch, creating) {
+  if (creating && !batch.length) return "Start the spec book";
+  if (batch.length !== 1) return `Update spec book (${batch.length} changes)`;
+  const op = batch[0];
+  switch (op.t) {
+    case "create": return `Add ${op.recipe.name}`;
+    case "edit": return `Edit ${op.fields.name || "spec"}`;
+    case "delete": return `Delete ${op.name || "spec"}`;
+    case "rate": return `Rate ${op.name}: ${op.rating.score}/5 from ${op.rating.who}`;
+    case "unrate": return `Remove a rating from ${op.name}`;
+  }
+  return "Update spec book";
+}
+function saveLocal() { store.setJSON("base", base); store.setJSON("ops", ops); }
+function recompute() {
+  const rs = clone(base ? base.recipes : []);
+  for (const op of ops) applyOp(rs, op);
+  S.recipes = rs;
+  renderAll();
+  refreshDatalists();
+  if (S.openId) { if (byId(S.openId)) renderDetail(); else closeDetail(); }
+}
+function change(op) {
+  ops.push(op);
+  saveLocal();
+  recompute();
+  sync();
+}
+async function sync() {
+  if (!CFG) return;
+  if (SY.busy) { SY.again = true; return; }
+  SY.busy = true; renderSync();
+  try {
+    let done = false;
+    for (let attempt = 0; attempt < 4 && !done; attempt++) {
+      const { data, sha } = await pullData();
+      const remote = data && Array.isArray(data.recipes) ? data : { version: 1, recipes: sha ? [] : SEED() };
+      const batch = ops.slice();
+      if (!batch.length && sha) { base = remote; done = true; break; }
+      const next = { version: 1, updatedAt: new Date().toISOString(), recipes: clone(remote.recipes) };
+      for (const op of batch) applyOp(next.recipes, op);
+      const res = await serial(() => pushData(next, sha, commitMsg(batch, !sha)));
+      if (res.conflict) continue;
+      base = next;
+      ops = ops.slice(batch.length);
+      done = true;
+    }
+    if (!done) throw new GhError("conflict", 409);
+    S.loaded = true;
+    SY.err = null; SY.at = new Date();
+  } catch (e) {
+    SY.err = e instanceof GhError ? e : new GhError("http", 0);
+  } finally {
+    SY.busy = false;
+    saveLocal();
+    recompute();
+    if (SY.again) { SY.again = false; if (ops.length) sync(); }
+  }
+}
+function renderSync() {
+  const el = $("#sync"); if (!el) return;
+  const n = ops.length;
+  let state = "ok", text;
+  if (SY.busy) { state = "saving"; text = n ? "Saving to GitHub…" : "Checking GitHub…"; }
+  else if (SY.err) {
+    const k = SY.err.kind;
+    if (k === "offline") { state = n ? "waiting" : "ok"; text = n ? `Offline · ${n} change${n === 1 ? "" : "s"} will save when you’re back online` : "Offline · showing your last saved copy"; }
+    else { state = "err"; text = k === "auth" ? "GitHub token expired · tap to update" : k === "missing" || k === "forbidden" ? "Can’t reach your repo · tap to fix" : `Not saved · tap to retry`; }
+  }
+  else if (n) { state = "waiting"; text = `${n} change${n === 1 ? "" : "s"} waiting to save`; }
+  else text = SY.at ? `Saved to GitHub · ${SY.at.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}` : "Saved to GitHub";
+  el.dataset.state = state;
+  el.textContent = text;
+}
+
+/* ================= photos ================= */
+const photoURLs = new Map();
+const PHOTO_CACHE = "sbphotos";
+const photoKey = path => new URL("./__photo/" + path, location.href).href;
+async function cachePut(path, blob) {
+  try { if ("caches" in window) { const c = await caches.open(PHOTO_CACHE); await c.put(photoKey(path), new Response(blob, { headers: { "Content-Type": blob.type || "image/jpeg" } })); } } catch {}
+}
+const inflight = new Map();
+function photoURL(path) {
+  if (photoURLs.has(path)) return Promise.resolve(photoURLs.get(path));
+  if (inflight.has(path)) return inflight.get(path);
+  const p = (async () => {
+    let blob = null;
+    try { if ("caches" in window) { const c = await caches.open(PHOTO_CACHE); const hit = await c.match(photoKey(path)); if (hit) blob = await hit.blob(); } } catch {}
+    if (!blob && CFG) {
+      const res = await gh(`/repos/${CFG.owner}/${CFG.repo}/contents/${encPath(path)}`, { headers: { Accept: "application/vnd.github.raw" } });
+      if (!res.ok) throw failFrom(res);
+      blob = await res.blob();
+      cachePut(path, blob);
+    }
+    if (!blob) throw new Error("no photo");
+    const url = URL.createObjectURL(blob);
+    photoURLs.set(path, url);
+    return url;
+  })();
+  inflight.set(path, p);
+  p.finally(() => inflight.delete(path)).catch(() => {});
+  return p;
+}
+function hydrate(root) {
+  $$("img[data-photo]", root).forEach(img => {
+    if (img.getAttribute("src")) return;
+    photoURL(img.dataset.photo).then(u => { if (img.isConnected) img.src = u; }).catch(() => {});
+  });
+}
+async function shrink(file) {
+  try {
+    const url = URL.createObjectURL(file);
+    const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+    const max = 1600, w = img.naturalWidth, h = img.naturalHeight;
+    const s = Math.min(1, max / Math.max(w, h));
+    const c = document.createElement("canvas");
+    c.width = Math.round(w * s); c.height = Math.round(h * s);
+    c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+    URL.revokeObjectURL(url);
+    const b = await new Promise(r => c.toBlob(r, "image/jpeg", 0.86));
+    if (b) return b;
+  } catch {}
+  throw new Error("decode");
+}
+async function uploadPhoto(recipeId, blob) {
+  const path = `photos/${recipeId}-${rid()}.jpg`;
+  const content = await blobToB64(blob);
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const res = await serial(() => gh(`/repos/${CFG.owner}/${CFG.repo}/contents/${encPath(path)}`, { method: "PUT", body: JSON.stringify({ message: "Add a photo", content }) }));
+    if (res.ok) {
+      photoURLs.set(path, URL.createObjectURL(blob));
+      cachePut(path, blob);
+      return path;
+    }
+    if (res.status !== 409) throw failFrom(res);
+    await new Promise(r => setTimeout(r, 500));
+  }
+  throw new GhError("conflict", 409);
+}
+async function deletePhoto(path) {
+  try {
+    const meta = await gh(`/repos/${CFG.owner}/${CFG.repo}/contents/${encPath(path)}`);
+    if (!meta.ok) return;
+    const { sha } = await meta.json();
+    await serial(() => gh(`/repos/${CFG.owner}/${CFG.repo}/contents/${encPath(path)}`, { method: "DELETE", body: JSON.stringify({ message: "Remove a photo", sha }) }));
+    if ("caches" in window) { const c = await caches.open(PHOTO_CACHE); await c.delete(photoKey(path)); }
+  } catch {}
+}
+
+/* ================= glass drawings ================= */
+const GLASS = {
+  coupe: '<path d="M6 12h28c0 9-6 14-14 14S6 21 6 12z"/><path d="M20 26v14M13 42h14"/>',
+  nora: '<path d="M10 9h20c0 10-4 16-10 16S10 19 10 9z"/><path d="M20 25v15M14 42h12"/>',
+  martini: '<path d="M6 9h28L20 25z"/><path d="M20 25v15M13 42h14"/>',
+  rocks: '<path d="M8 14h24l-2.5 28h-19z"/><path d="M9.3 26h21.4"/>',
+  highball: '<path d="M12 4h16l-1.5 40h-13z"/><path d="M12.6 16h14.8"/>',
+  wine: '<path d="M12 5h16c1 11-2 19-8 19s-9-8-8-19z"/><path d="M20 24v16M14 42h12"/>',
+  flute: '<path d="M15 3h10c0 15-1 22-5 22s-5-7-5-22z"/><path d="M20 25v15M14 42h12"/>',
+  mug: '<path d="M9 8h18v34H9z"/><path d="M27 15h4a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3h-4"/>'
+};
+function glassKey(g) {
+  g = norm(g);
+  if (/coupe/.test(g)) return "coupe";
+  if (/nick|nora/.test(g)) return "nora";
+  if (/martini|cocktail glass/.test(g)) return "martini";
+  if (/high|collins|zombie|tall/.test(g)) return "highball";
+  if (/wine|spritz|balloon|copa/.test(g)) return "wine";
+  if (/flute|champ/.test(g)) return "flute";
+  if (/mug|tiki|julep|cup/.test(g)) return "mug";
+  return "rocks";
+}
+const glassSVG = g => `<svg viewBox="0 0 40 46" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round">${GLASS[glassKey(g)]}</svg>`;
+
+/* ================= numbers ================= */
+const FR = { "¼": .25, "½": .5, "¾": .75, "⅓": 1 / 3, "⅔": 2 / 3, "⅛": .125, "⅜": .375, "⅝": .625, "⅞": .875 };
+function parseAmt(raw) {
+  const orig = String(raw ?? "").trim();
+  if (!orig) return null;
+  let s = orig.replace(",", ".");
+  for (const k in FR) s = s.split(k).join(" " + FR[k] + " ");
+  let total = 0, ok = false;
+  for (const p of s.split(/\s+/).filter(Boolean)) {
+    if (/^\d+\/\d+$/.test(p)) { const [a, b] = p.split("/").map(Number); if (!b) return orig; total += a / b; ok = true; }
+    else if (/^\d*\.?\d+$/.test(p)) { total += parseFloat(p); ok = true; }
+    else return orig;
+  }
+  return ok ? Math.round(total * 1000) / 1000 : orig;
+}
+const fmtNum = n => String(Math.round(n * 100) / 100);
+function frac(n) {
+  const w = Math.floor(n + 1e-9), f = n - w;
+  const map = [[0, ""], [.125, "⅛"], [.25, "¼"], [1 / 3, "⅓"], [.375, "⅜"], [.5, "½"], [.625, "⅝"], [2 / 3, "⅔"], [.75, "¾"], [.875, "⅞"], [1, ""]];
+  for (const [v, g] of map) {
+    if (Math.abs(f - v) < 0.02) {
+      if (v === 1) return String(w + 1);
+      if (!g) return String(w);
+      return (w ? w : "") + g;
+    }
+  }
+  return fmtNum(n);
+}
+const UW = { dash: ["dash", "dashes"], barspoon: ["barspoon", "barspoons"], drop: ["drop", "drops"], pinch: ["pinch", "pinches"], tsp: ["tsp", "tsp"], oz: ["oz", "oz"], ml: ["ml", "ml"], whole: ["", ""], "": ["", ""] };
+const unitWord = (u, n) => (UW[u] || [u, u])[n === 1 ? 0 : 1];
+function amtText(a, unit) {
+  unit = unit || "";
+  if (unit === "top") return a ? `Top ${typeof a === "number" ? fmtNum(a) : a}` : "Top";
+  if (unit === "rinse") return "Rinse";
+  if (a == null || a === "") return unit ? unitWord(unit, 1) : "";
+  if (typeof a !== "number") return `${a} ${unitWord(unit, 2)}`.trim();
+  if (unit === "oz" && S.unit === "ml") return `${fmtNum(Math.round(a * 30 * 2) / 2)} ml`;
+  if (unit === "ml" && S.unit === "oz") return `${frac(Math.round(a / 30 * 8) / 8)} oz`;
+  const shown = ["oz", "barspoon", "tsp"].includes(unit) ? frac(a) : fmtNum(a);
+  return `${shown} ${unitWord(unit, a)}`.trim();
+}
+const amtInput = a => a == null ? "" : String(a);
+
+/* ================= helpers ================= */
+function avg(r) {
+  const rs = r.ratings || [];
+  if (!rs.length) return null;
+  return rs.reduce((t, x) => t + (+x.score || 0), 0) / rs.length;
+}
+function stars(v, size) {
+  const pct = v == null ? 0 : Math.max(0, Math.min(100, v / 5 * 100));
+  const label = v == null ? "No ratings" : `${(+v).toFixed(1)} out of 5`;
+  return `<span class="stars ${size}" role="img" aria-label="${label}"><span class="base">★★★★★</span><span class="fill" style="width:${pct}%">★★★★★</span></span>`;
+}
+const fmtDate = s => { const d = new Date(s); return isNaN(d) ? "" : d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }); };
+const byId = id => S.recipes.find(r => r.id === id);
+const rid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+let toastT;
+function toast(msg) {
+  $("#toast-text").textContent = msg;
+  const t = $("#toast"); t.classList.add("show");
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), 2800);
+}
+function show(sel) { const el = $(sel); el.classList.add("open"); el.setAttribute("aria-hidden", "false"); }
+function hide(sel) { const el = $(sel); el.classList.remove("open"); el.setAttribute("aria-hidden", "true"); }
+
+/* ================= list ================= */
+function haystack(r, scope) {
+  const ing = (r.ingredients || []).map(i => i.name).join(" ");
+  const tags = (r.tags || []).join(" ");
+  switch (scope) {
+    case "name": return r.name;
+    case "type": return r.type;
+    case "ingredient": return ing;
+    case "tag": return tags;
+    default: return [r.name, r.type, r.method, r.glass, r.garnish, r.ice, ing, tags, r.notes, r.source].join(" ");
+  }
+}
+const SORTS = {
+  name: (a, b) => norm(a.name).localeCompare(norm(b.name)),
+  rating: (a, b) => ((avg(b) ?? -1) - (avg(a) ?? -1)) || SORTS.name(a, b),
+  count: (a, b) => (((b.ratings || []).length - (a.ratings || []).length)) || SORTS.name(a, b),
+  newest: (a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")),
+  edited: (a, b) => String(b.updatedAt || b.createdAt || "").localeCompare(String(a.updatedAt || a.createdAt || ""))
+};
+function visible() {
+  let rs = S.recipes.slice();
+  if (S.type) rs = rs.filter(r => (r.type || "") === S.type);
+  if (S.tag) rs = rs.filter(r => (r.tags || []).includes(S.tag));
+  const terms = norm(S.q).split(/\s+/).filter(Boolean);
+  if (terms.length) rs = rs.filter(r => { const h = norm(haystack(r, S.scope)); return terms.every(t => h.includes(t)); });
+  return rs.sort(SORTS[S.sort] || SORTS.name);
+}
+function rowHTML(r) {
+  const a = avg(r), n = (r.ratings || []).length;
+  const thumb = (r.photos && r.photos[0]) ? `<img data-photo="${esc(r.photos[0])}" alt="">` : glassSVG(r.glass);
+  const meta = [...new Set([r.type, r.method].filter(Boolean))].map(esc).join(" · ");
+  const ings = (r.ingredients || []).map(i => i.name).filter(Boolean).map(esc).join(" · ");
+  return `<li><button type="button" class="row" data-open="${esc(r.id)}">
+    <span class="thumb">${thumb}</span>
+    <span class="row-main">
+      ${meta ? `<span class="row-meta">${meta}</span>` : ""}
+      <span class="row-name">${esc(r.name || "Untitled")}</span>
+      ${ings ? `<span class="row-ing">${ings}</span>` : ""}
+      <span class="row-rate">${stars(a, "sm")}${a == null ? "Not rated yet" : `${a.toFixed(1)} · ${n} rating${n === 1 ? "" : "s"}`}</span>
+    </span>
+    <span class="chev" aria-hidden="true"></span>
+  </button></li>`;
+}
+function renderChips() {
+  const types = new Map(), tags = new Map();
+  for (const r of S.recipes) {
+    if (r.type) types.set(r.type, (types.get(r.type) || 0) + 1);
+    for (const t of (r.tags || [])) tags.set(t, (tags.get(t) || 0) + 1);
+  }
+  const el = $("#chips");
+  if (!types.size && !tags.size) { el.hidden = true; el.innerHTML = ""; return; }
+  const ts = [...types].sort((a, b) => a[0].localeCompare(b[0]));
+  const gs = [...tags].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  el.innerHTML =
+    ts.map(([t, n]) => `<button type="button" class="chip" data-type="${esc(t)}" aria-pressed="${S.type === t}">${esc(t)}<span class="n">${n}</span></button>`).join("") +
+    (ts.length && gs.length ? `<span class="chip-sep" aria-hidden="true"></span>` : "") +
+    gs.map(([t]) => `<button type="button" class="chip tag" data-tag="${esc(t)}" aria-pressed="${S.tag === t}">${esc(t)}</button>`).join("");
+  el.hidden = false;
+}
+function renderAll() {
+  const total = S.recipes.length;
+  const nRatings = S.recipes.reduce((t, r) => t + (r.ratings || []).length, 0);
+  $("#tally").textContent = !S.loaded ? "Opening the book…" : `${total} spec${total === 1 ? "" : "s"} · ${nRatings} rating${nRatings === 1 ? "" : "s"}`;
+  $("#fab").hidden = !(CFG && S.loaded) || !$("#setup-screen").hidden;
+  $$(".unit-toggle button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.unit === S.unit)));
+  $$("#scope button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.scope === S.scope)));
+  $("#sort").value = S.sort;
+  $("#q-clear").hidden = !S.q;
+  renderSync();
+  renderChips();
+
+  const list = $("#list"), empty = $("#empty"), note = $("#note");
+  const filtered = !!(S.q || S.type || S.tag);
+  if (!S.loaded || !total) {
+    list.hidden = true; list.innerHTML = ""; note.hidden = true;
+    empty.hidden = false;
+    empty.innerHTML = !S.loaded
+      ? (SY.err && SY.err.kind === "offline"
+          ? `${glassSVG("coupe")}<h2>You’re offline</h2><p>Connect to the internet once to load your spec book onto this phone.</p>`
+          : `${glassSVG("nora")}<h2>Opening the spec book</h2><p>Loading your recipes from GitHub.</p>`)
+      : `${glassSVG("coupe")}<h2>No specs yet</h2><p>Tap New spec to write your first recipe: the spec, method, photos and who rated it.</p>`;
+    return;
+  }
+  const rs = visible();
+  note.hidden = !filtered;
+  if (filtered) note.innerHTML = `<span>${rs.length} of ${total} specs</span><button type="button" class="link-sm" data-clear>Clear filters</button>`;
+  if (!rs.length) {
+    list.hidden = true; list.innerHTML = "";
+    empty.hidden = false;
+    empty.innerHTML = `${glassSVG("rocks")}<h2>Nothing matches</h2><p>${S.q ? `No ${S.scope === "all" ? "spec" : S.scope} matches “${esc(S.q)}”${S.type || S.tag ? " with these filters" : ""}.` : "No specs carry this combination of filters."}</p><button type="button" class="btn ghost" data-clear>Clear filters</button>`;
+    return;
+  }
+  empty.hidden = true; empty.innerHTML = "";
+  list.hidden = false;
+  list.innerHTML = rs.map(rowHTML).join("");
+  hydrate(list);
+}
+function refreshDatalists() {
+  const uniq = arr => [...new Set(arr.filter(Boolean).map(s => String(s).trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+  const fill = (id, vals) => { $("#" + id).innerHTML = vals.map(v => `<option value="${esc(v)}"></option>`).join(""); };
+  const R = S.recipes;
+  fill("dl-types", uniq([...TYPES, ...R.map(r => r.type)]));
+  fill("dl-glass", uniq([...GLASSES, ...R.map(r => r.glass)]));
+  fill("dl-ice", uniq([...ICES, ...R.map(r => r.ice)]));
+  fill("dl-garnish", uniq(R.map(r => r.garnish)));
+  fill("dl-ings", uniq(R.flatMap(r => (r.ingredients || []).map(i => i.name))));
+  fill("dl-tags", uniq(R.flatMap(r => r.tags || [])));
+  fill("dl-raters", uniq(R.flatMap(r => (r.ratings || []).map(x => x.who))));
+}
+function clearFilters() { S.q = ""; S.type = null; S.tag = null; S.scope = "all"; $("#q").value = ""; renderAll(); }
+
+/* ================= detail ================= */
+function openDetail(id) {
+  if (!byId(id)) return;
+  S.openId = id;
+  resetRateForm();
+  renderDetail();
+  show("#detail");
+  $("#detail").scrollTop = 0;
+}
+function closeDetail() { S.openId = null; hide("#detail"); }
+function renderDetail() {
+  const r = byId(S.openId);
+  if (!r) return;
+  $("#detail-headname").textContent = r.name || "Untitled";
+  const photos = r.photos || [];
+  const gallery = photos.length
+    ? `<div class="gallery-wrap"><div class="gallery" id="gallery">${photos.map((p, i) => `<img data-photo="${esc(p)}" alt="${esc(r.name)}, photo ${i + 1}">`).join("")}</div>${photos.length > 1 ? `<div class="dots" id="dots">${photos.map((_, i) => `<span class="${i ? "" : "on"}"></span>`).join("")}</div>` : ""}</div>`
+    : `<div class="gallery-wrap"><div class="hero-glass">${glassSVG(r.glass)}</div></div>`;
+  const a = avg(r), n = (r.ratings || []).length;
+  const facts = [["Method", r.method], ["Glass", r.glass], ["Ice", r.ice], ["Garnish", r.garnish]].filter(f => f[1]);
+  const ings = (r.ingredients || []).filter(i => i.name || i.amount != null);
+  const steps = (r.steps || []).filter(Boolean);
+  $("#d-main").innerHTML = `${gallery}
+  <div class="wrap">
+    <div class="d-head">
+      ${r.type ? `<p class="eyebrow">${esc(r.type)}</p>` : ""}
+      <h2 class="d-name">${esc(r.name || "Untitled")}</h2>
+      <div class="d-rate">${stars(a, "sm")}${a == null ? "Not rated yet" : `${a.toFixed(1)} from ${n} rating${n === 1 ? "" : "s"}`}</div>
+    </div>
+    ${facts.length ? `<dl class="facts">${facts.map(([k, v]) => `<div class="fact"><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl>` : ""}
+    ${ings.length ? `<h3 class="sec">Spec</h3><ul class="spec">${ings.map(i => `<li><span class="amt">${esc(amtText(i.amount, i.unit))}</span><button type="button" class="ing" data-ing="${esc(i.name)}" aria-label="Find other specs with ${esc(i.name)}">${esc(i.name)}</button></li>`).join("")}</ul>` : ""}
+    ${steps.length ? `<h3 class="sec">Method</h3><ol class="steps">${steps.map(s => `<li>${esc(s)}</li>`).join("")}</ol>` : ""}
+    ${r.notes ? `<h3 class="sec">Notes</h3><p class="prose">${esc(r.notes)}</p>` : ""}
+    ${r.source ? `<h3 class="sec">Inspired by</h3><p class="prose">${esc(r.source)}</p>` : ""}
+    ${(r.tags || []).length ? `<h3 class="sec">Tags</h3><div class="tagrow">${r.tags.map(t => `<button type="button" class="chip tag" data-tagf="${esc(t)}">${esc(t)}</button>`).join("")}</div>` : ""}
+  </div>`;
+  hydrate($("#d-main"));
+  const g = $("#gallery");
+  if (g && $("#dots")) g.addEventListener("scroll", () => {
+    const i = Math.round(g.scrollLeft / Math.max(1, g.clientWidth));
+    $$("#dots span").forEach((d, k) => d.classList.toggle("on", k === i));
+  }, { passive: true });
+
+  const rs = [...(r.ratings || [])].sort((x, y) => String(y.at).localeCompare(String(x.at)));
+  $("#d-ratings").innerHTML = !rs.length
+    ? `<p class="muted" style="margin:0">No ratings yet. Pour one and log everyone’s score below.</p>`
+    : `<div class="rate-summary"><span class="rate-big">${a.toFixed(1)}</span><div>${stars(a, "lg")}<div class="muted small" style="margin-top:4px">${n} rating${n === 1 ? "" : "s"} out of 5</div></div></div>
+      <ul class="rate-list">${rs.map(x => `<li>
+        <div class="r-top"><span class="r-who">${esc(x.who)}</span>${stars(x.score, "sm")}</div>
+        <div class="r-side"><span>${esc(fmtDate(x.at))}</span><button type="button" class="r-del" data-rdel="${esc(x.id)}">Remove</button></div>
+        ${x.note ? `<p class="r-note">${esc(x.note)}</p>` : ""}
+      </li>`).join("")}</ul>`;
+
+  $("#d-foot").innerHTML = `<div class="d-foot">
+    <button type="button" class="btn ghost" id="d-variation">Make a variation</button><button type="button" class="btn outline" id="d-delete">Delete spec</button>
+    <p class="stamp">Added ${esc(fmtDate(r.createdAt))}${r.updatedAt && r.updatedAt !== r.createdAt ? ` · Edited ${esc(fmtDate(r.updatedAt))}` : ""}</p>
+  </div>`;
+}
+function resetRateForm() {
+  STAR = 0; paintStars();
+  $("#rate-note").value = "";
+  $("#rate-who").value = store.get("rater", "");
+}
+function paintStars() {
+  $$("#star-input button").forEach(b => {
+    const v = +b.dataset.star;
+    b.classList.toggle("on", v <= STAR);
+    b.setAttribute("aria-checked", String(v === STAR));
+  });
+}
+function addRating() {
+  const r = byId(S.openId); if (!r) return;
+  const who = $("#rate-who").value.trim();
+  if (!STAR) { toast("Tap a score from 1 to 5 stars"); return; }
+  if (!who) { toast("Add who gave the rating"); $("#rate-who").focus(); return; }
+  const rating = { id: rid(), who, score: STAR, note: $("#rate-note").value.trim(), at: new Date().toISOString() };
+  change({ t: "rate", id: r.id, name: r.name, rating });
+  store.set("rater", who);
+  toast(`Logged ${STAR} star${STAR === 1 ? "" : "s"} from ${who}`);
+  STAR = 0; paintStars(); $("#rate-note").value = ""; $("#rate-who").value = "";
+}
+function armed(btn, label, armedLabel, onConfirm) {
+  if (btn.classList.contains("armed")) { onConfirm(); return; }
+  btn.classList.add("armed"); btn.textContent = armedLabel;
+  setTimeout(() => { if (btn.isConnected) { btn.classList.remove("armed"); btn.textContent = label; } }, 3500);
+}
+function deleteRecipe() {
+  const r = byId(S.openId); if (!r) return;
+  closeDetail();
+  change({ t: "delete", id: r.id, name: r.name });
+  toast(`Deleted ${r.name}`);
+  for (const p of (r.photos || [])) deletePhoto(p);
+}
+
+/* ================= editor ================= */
+function openEditor(recipe, mode) {
+  const src = recipe ? clone(recipe) : {};
+  const blank = () => ({ amount: null, unit: "oz", name: "" });
+  ED = {
+    id: mode === "edit" ? recipe.id : rid(),
+    mode,
+    method: src.method || "",
+    tags: [...(src.tags || [])],
+    photos: mode === "edit" ? [...(src.photos || [])] : [],
+    original: mode === "edit" ? [...(src.photos || [])] : [],
+    uploadedNow: [], pending: [],
+    ings: (src.ingredients && src.ingredients.length) ? src.ingredients : [blank(), blank(), blank()]
+  };
+  const name = mode === "variation" ? `${src.name} variation` : (src.name || "");
+  const source = mode === "variation" ? (src.source ? src.source : `Riff on ${src.name}`) : (src.source || "");
+  $("#ed-title").textContent = mode === "edit" ? "Edit spec" : mode === "variation" ? "New variation" : "New spec";
+  $("#ed-body").innerHTML = `
+  <div class="ed-group">
+    <label class="field" for="ed-name"><span>Name</span><input id="ed-name" value="${esc(name)}" placeholder="e.g. Forest Floor Spritz" autocomplete="off"></label>
+    <div class="field-row">
+      <label class="field" for="ed-type"><span>Type</span><input id="ed-type" list="dl-types" value="${esc(src.type || "")}" placeholder="Sour, Spritz…" autocomplete="off"></label>
+      <label class="field" for="ed-glass"><span>Glass</span><input id="ed-glass" list="dl-glass" value="${esc(src.glass || "")}" placeholder="Coupe" autocomplete="off"></label>
+    </div>
+    <div class="field"><span>Method</span><div class="seg" id="ed-method" role="group" aria-label="Method"></div></div>
+    <div class="field-row">
+      <label class="field" for="ed-ice"><span>Ice</span><input id="ed-ice" list="dl-ice" value="${esc(src.ice || "")}" placeholder="Large cube" autocomplete="off"></label>
+      <label class="field" for="ed-garnish"><span>Garnish</span><input id="ed-garnish" list="dl-garnish" value="${esc(src.garnish || "")}" placeholder="Lemon twist" autocomplete="off"></label>
+    </div>
+  </div>
+  <section class="ed-section">
+    <h3 class="sec">Spec</h3>
+    <div class="ing-head" aria-hidden="true"><span>Amt</span><span>Unit</span><span>Ingredient</span><span></span></div>
+    <div id="ed-ings" style="display:grid;gap:6px"></div>
+    <button type="button" class="add-row" id="ed-add-ing">+ Add ingredient</button>
+    <p class="hint">Amounts take decimals or fractions: 0.75, 3/4 or 1 1/2.</p>
+  </section>
+  <section class="ed-section">
+    <h3 class="sec">Photos</h3>
+    <div class="ph-grid" id="ed-photos"></div>
+    <input type="file" id="ed-photo-input" accept="image/*" multiple class="sr" tabindex="-1">
+    <p class="hint" id="ed-photo-hint"></p>
+  </section>
+  <section class="ed-section">
+    <label class="field" for="ed-steps"><span class="sec" style="margin:0">Method steps</span><textarea id="ed-steps" rows="4" placeholder="One step per line">${esc((src.steps || []).join("\n"))}</textarea></label>
+  </section>
+  <section class="ed-section">
+    <h3 class="sec">Tags</h3>
+    <div class="tag-input"><span id="ed-tag-chips" style="display:contents"></span><input id="ed-tag-new" list="dl-tags" placeholder="Add tag" autocomplete="off" autocapitalize="none" enterkeyhint="done" aria-label="Add tag"></div>
+  </section>
+  <section class="ed-section">
+    <label class="field" for="ed-notes"><span class="sec" style="margin:0">Notes</span><textarea id="ed-notes" rows="4" placeholder="What worked, what to change next time">${esc(src.notes || "")}</textarea></label>
+    <label class="field" for="ed-source"><span>Inspired by</span><input id="ed-source" value="${esc(source)}" placeholder="A bar, a book, a classic" autocomplete="off"></label>
+  </section>`;
+  renderMethod(); renderIngs(); renderPhotos(); renderTags();
+  show("#editor");
+  $("#editor").scrollTop = 0;
+}
+function renderMethod() {
+  $("#ed-method").innerHTML = METHODS.map(m => `<button type="button" class="chip" data-method="${m}" aria-pressed="${ED.method === m}">${m}</button>`).join("");
+}
+function collectIngs() {
+  return $$("#ed-ings .ing-row").map(row => ({
+    amount: parseAmt($(".ing-amt", row).value),
+    unit: $(".ing-unit", row).value,
+    name: $(".ing-name", row).value.trim()
+  }));
+}
+function renderIngs() {
+  $("#ed-ings").innerHTML = ED.ings.map((i, idx) => `<div class="ing-row">
+    <input class="ing-amt" id="ing-amt-${idx}" inputmode="decimal" placeholder="2" value="${esc(amtInput(i.amount))}" aria-label="Amount ${idx + 1}" autocomplete="off">
+    <select class="ing-unit" id="ing-unit-${idx}" aria-label="Unit ${idx + 1}">${UNITS.map(u => `<option value="${u}"${u === (i.unit ?? "oz") ? " selected" : ""}>${u || "count"}</option>`).join("")}</select>
+    <input class="ing-name" id="ing-name-${idx}" list="dl-ings" placeholder="Ingredient" value="${esc(i.name || "")}" aria-label="Ingredient ${idx + 1}" autocomplete="off">
+    <button type="button" class="ing-del" data-ingdel="${idx}" aria-label="Remove ingredient ${idx + 1}">×</button>
+  </div>`).join("");
+}
+function renderPhotos() {
+  const grid = $("#ed-photos"); if (!grid || !ED) return;
+  grid.innerHTML =
+    ED.photos.map((p, i) => `<div class="ph"><img data-photo="${esc(p)}" alt="Photo ${i + 1}">${i ? `<button type="button" class="mk" data-phcover="${i}" aria-label="Make photo ${i + 1} the cover"></button>` : `<span class="cover">Cover</span>`}<button type="button" class="x" data-phdel="${i}" aria-label="Remove photo ${i + 1}">×</button></div>`).join("") +
+    ED.pending.map(p => `<div class="ph loading"><img src="${p.url}" alt="Uploading"></div>`).join("") +
+    `<label class="ph add" for="ed-photo-input">+ Add<br>photo</label>`;
+  hydrate(grid);
+  $("#ed-photo-hint").textContent = ED.photos.length > 1 ? "Tap a photo to make it the cover." : "Take a photo or pick one from your library. Photos need a connection to upload.";
+}
+function renderTags() {
+  $("#ed-tag-chips").innerHTML = ED.tags.map((t, i) => `<span class="tagchip">${esc(t)}<button type="button" data-tagdel="${i}" aria-label="Remove tag ${esc(t)}">×</button></span>`).join("");
+}
+function commitTag() {
+  const inp = $("#ed-tag-new"); if (!inp || !ED) return;
+  const parts = inp.value.split(",").map(s => s.trim().replace(/^#/, "").toLowerCase()).filter(Boolean);
+  for (const p of parts) if (!ED.tags.includes(p)) ED.tags.push(p);
+  inp.value = ""; renderTags();
+}
+async function addPhotos(files) {
+  const ed = ED;
+  for (const f of files) {
+    const tmp = { url: URL.createObjectURL(f) };
+    ed.pending.push(tmp); renderPhotos();
+    try {
+      const blob = await shrink(f);
+      const path = await uploadPhoto(ed.id, blob);
+      if (ED !== ed) { deletePhoto(path); continue; }
+      ed.photos.push(path); ed.uploadedNow.push(path);
+    } catch (e) {
+      toast(e && e.kind === "offline" ? "You’re offline. Photos upload once you’re connected." : e && e.message === "decode" ? "That photo couldn’t be read. Try another one." : "The photo didn’t upload. Try again.");
+    } finally {
+      ed.pending = ed.pending.filter(p => p !== tmp);
+      URL.revokeObjectURL(tmp.url);
+      if (ED === ed) renderPhotos();
+    }
+  }
+}
+function saveEditor() {
+  if (!ED) return;
+  const name = $("#ed-name").value.trim();
+  if (!name) { toast("Give the spec a name"); $("#ed-name").focus(); return; }
+  if (ED.pending.length) { toast("Wait for the photos to finish uploading"); return; }
+  commitTag();
+  const v = id => $("#" + id).value.trim();
+  const now = new Date().toISOString();
+  const fields = {
+    name, type: v("ed-type"), glass: v("ed-glass"), ice: v("ed-ice"), garnish: v("ed-garnish"),
+    method: ED.method || "",
+    ingredients: collectIngs().filter(i => i.name || (i.amount != null && i.amount !== "")),
+    steps: $("#ed-steps").value.split("\n").map(s => s.trim()).filter(Boolean),
+    notes: $("#ed-notes").value.trim(), source: v("ed-source"),
+    tags: ED.tags.slice(), photos: ED.photos.slice(), updatedAt: now
+  };
+  const ed = ED;
+  if (ed.mode === "edit") change({ t: "edit", id: ed.id, fields });
+  else change({ t: "create", id: ed.id, recipe: { id: ed.id, ...fields, createdAt: now, ratings: [] } });
+  const keep = new Set(fields.photos);
+  const drop = [...new Set([...ed.original, ...ed.uploadedNow])].filter(p => !keep.has(p));
+  ED = null;
+  hide("#editor");
+  toast(ed.mode === "edit" ? "Saved" : `Added ${name}`);
+  openDetail(ed.id);
+  for (const p of drop) deletePhoto(p);
+}
+function cancelEditor() {
+  const ed = ED; ED = null;
+  hide("#editor");
+  if (ed) for (const p of ed.uploadedNow) deletePhoto(p);
+}
+
+/* ================= settings ================= */
+function openSettings() {
+  const n = ops.length;
+  $("#set-body").innerHTML = `
+  <div class="card">
+    <h2>Where your specs live</h2>
+    <p>Every change saves to <span class="code">${esc(CFG.owner)}/${esc(CFG.repo)}</span> on GitHub as <span class="code">${DATA_PATH}</span>, with photos in its <span class="code">photos</span> folder. This phone keeps a copy so the book opens instantly and works offline.</p>
+    <dl class="set-list">
+      <div><dt>Status</dt><dd>${esc($("#sync").textContent)}</dd></div>
+      <div><dt>Waiting to save</dt><dd>${n ? `${n} change${n === 1 ? "" : "s"}` : "Nothing"}</dd></div>
+    </dl>
+    <div class="stack">
+      <button type="button" class="btn" id="set-sync">Sync now</button>
+      <a class="btn ghost" style="text-align:center;text-decoration:none" href="https://github.com/${encodeURIComponent(CFG.owner)}/${encodeURIComponent(CFG.repo)}/commits" target="_blank" rel="noopener">See change history on GitHub</a>
+    </div>
+  </div>
+  <form class="card" id="set-token-form" novalidate>
+    <h2>Update token</h2>
+    <p>Use this when GitHub says your token expired. Your specs stay put.</p>
+    <label class="field" for="set-token"><span>New token</span><input id="set-token" type="password" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="github_pat_…"></label>
+    <button type="submit" class="btn ghost">Save token</button>
+  </form>
+  <div class="card">
+    <h2>Disconnect this phone</h2>
+    <p>Removes the token and the local copy from this phone. Everything on GitHub stays.${n ? ` <strong>${n} unsaved change${n === 1 ? "" : "s"} would be lost.</strong>` : ""}</p>
+    <button type="button" class="btn outline" id="set-disconnect">Disconnect</button>
+  </div>`;
+  show("#settings");
+  $("#settings").scrollTop = 0;
+}
+async function checkRepo(cfg) {
+  const res = await gh(`/repos/${cfg.owner}/${cfg.repo}`, {}, cfg);
+  if (res.status === 401) throw new GhError("auth", 401, "GitHub didn’t accept that token. Copy it again and paste the whole thing.");
+  if (res.status === 404 || res.status === 403) throw new GhError("missing", res.status, "The token can’t see that repository. Check the name, and that the token’s repository access includes it.");
+  if (!res.ok) throw new GhError("http", res.status, "GitHub didn’t answer. Try again in a moment.");
+  const j = await res.json();
+  if (j.permissions && j.permissions.push === false) throw new GhError("forbidden", 403, "The token can read but not write. Set Contents to “Read and write”.");
+  return j;
+}
+
+/* ================= events ================= */
+$("#q").addEventListener("input", e => { S.q = e.target.value; renderAll(); });
+$("#q-clear").addEventListener("click", () => { S.q = ""; $("#q").value = ""; renderAll(); $("#q").focus(); });
+$("#scope").addEventListener("click", e => { const b = e.target.closest("[data-scope]"); if (!b) return; S.scope = b.dataset.scope; renderAll(); });
+$("#sort").addEventListener("change", e => { S.sort = e.target.value; store.set("sort", S.sort); renderAll(); });
+$("#chips").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.dataset.type != null) S.type = S.type === b.dataset.type ? null : b.dataset.type;
+  if (b.dataset.tag != null) S.tag = S.tag === b.dataset.tag ? null : b.dataset.tag;
+  renderAll();
+});
+$(".unit-toggle").addEventListener("click", e => {
+  const b = e.target.closest("[data-unit]"); if (!b) return;
+  S.unit = b.dataset.unit; store.set("unit", S.unit); renderAll(); if (S.openId) renderDetail();
+});
+$("#list-area").addEventListener("click", e => {
+  if (e.target.closest("[data-clear]")) { clearFilters(); return; }
+  const r = e.target.closest("[data-open]"); if (r) openDetail(r.dataset.open);
+});
+$("#fab").addEventListener("click", () => openEditor(null, "new"));
+$("#open-settings").addEventListener("click", openSettings);
+$("#sync").addEventListener("click", () => { if (SY.err && SY.err.kind !== "offline") openSettings(); else sync(); });
+const mainScreen = $("#main-screen"), bar = $("#bar"), mast = $("#masthead");
+mainScreen.addEventListener("scroll", () => bar.classList.toggle("stuck", mainScreen.scrollTop > mast.offsetHeight - 4), { passive: true });
+
+$("#detail-close").addEventListener("click", closeDetail);
+$("#detail-edit").addEventListener("click", () => { const r = byId(S.openId); if (r) openEditor(r, "edit"); });
+$("#detail-body").addEventListener("click", e => {
+  const ing = e.target.closest("[data-ing]");
+  if (ing) { closeDetail(); S.scope = "ingredient"; S.q = ing.dataset.ing; S.type = null; S.tag = null; $("#q").value = S.q; renderAll(); mainScreen.scrollTop = 0; return; }
+  const tg = e.target.closest("[data-tagf]");
+  if (tg) { closeDetail(); S.tag = tg.dataset.tagf; S.q = ""; $("#q").value = ""; renderAll(); mainScreen.scrollTop = 0; return; }
+  const rd = e.target.closest("[data-rdel]");
+  if (rd) {
+    armed(rd, "Remove", "Tap to confirm", () => { const r = byId(S.openId); if (r) { change({ t: "unrate", id: r.id, name: r.name, ratingId: rd.dataset.rdel }); toast("Rating removed"); } });
+    return;
+  }
+  if (e.target.closest("#d-variation")) { const r = byId(S.openId); if (r) openEditor(r, "variation"); return; }
+  const del = e.target.closest("#d-delete");
+  if (del) armed(del, "Delete spec", "Tap again to delete", deleteRecipe);
+});
+$("#star-input").addEventListener("click", e => { const b = e.target.closest("[data-star]"); if (!b) return; STAR = +b.dataset.star; paintStars(); });
+$("#rate-form").addEventListener("submit", e => { e.preventDefault(); addRating(); });
+
+$("#ed-form").addEventListener("submit", e => { e.preventDefault(); saveEditor(); });
+$("#ed-cancel").addEventListener("click", cancelEditor);
+$("#ed-body").addEventListener("click", e => {
+  if (!ED) return;
+  const m = e.target.closest("[data-method]");
+  if (m) { ED.method = ED.method === m.dataset.method ? "" : m.dataset.method; renderMethod(); return; }
+  if (e.target.closest("#ed-add-ing")) {
+    ED.ings = collectIngs(); ED.ings.push({ amount: null, unit: "oz", name: "" }); renderIngs();
+    const last = $(`#ing-amt-${ED.ings.length - 1}`); if (last) last.focus();
+    return;
+  }
+  const d = e.target.closest("[data-ingdel]");
+  if (d) { ED.ings = collectIngs(); ED.ings.splice(+d.dataset.ingdel, 1); renderIngs(); return; }
+  const pd = e.target.closest("[data-phdel]");
+  if (pd) { ED.photos.splice(+pd.dataset.phdel, 1); renderPhotos(); return; }
+  const pc = e.target.closest("[data-phcover]");
+  if (pc) { const i = +pc.dataset.phcover; const [p] = ED.photos.splice(i, 1); ED.photos.unshift(p); renderPhotos(); return; }
+  const td = e.target.closest("[data-tagdel]");
+  if (td) { ED.tags.splice(+td.dataset.tagdel, 1); renderTags(); }
+});
+$("#ed-body").addEventListener("change", e => {
+  if (e.target.id === "ed-photo-input" && ED) {
+    const files = Array.from(e.target.files || []); e.target.value = "";
+    if (files.length) addPhotos(files);
+  }
+});
+$("#ed-body").addEventListener("keydown", e => {
+  if (e.target.id === "ed-tag-new" && (e.key === "Enter" || e.key === ",")) { e.preventDefault(); commitTag(); }
+});
+$("#ed-body").addEventListener("input", e => { if (e.target.id === "ed-tag-new" && e.target.value.includes(",")) commitTag(); });
+$("#ed-body").addEventListener("focusout", e => { if (e.target.id === "ed-tag-new" && ED) commitTag(); });
+
+$("#set-close").addEventListener("click", () => hide("#settings"));
+$("#set-body").addEventListener("click", e => {
+  if (e.target.closest("#set-sync")) { sync().then(() => { if ($("#settings").classList.contains("open")) openSettings(); }); toast("Syncing with GitHub"); return; }
+  const dc = e.target.closest("#set-disconnect");
+  if (dc) armed(dc, "Disconnect", "Tap again to disconnect", () => {
+    ["cfg", "base", "ops"].forEach(k => store.del(k));
+    try { if ("caches" in window) caches.delete(PHOTO_CACHE); } catch {}
+    location.reload();
+  });
+});
+$("#set-body").addEventListener("submit", async e => {
+  if (e.target.id !== "set-token-form") return;
+  e.preventDefault();
+  const token = $("#set-token").value.trim();
+  if (!token) { toast("Paste the new token first"); return; }
+  const cfg = { ...CFG, token };
+  try {
+    await checkRepo(cfg);
+    CFG = cfg; store.setJSON("cfg", CFG);
+    toast("Token updated"); hide("#settings"); sync();
+  } catch (err) { toast(err.message || "That token didn’t work."); }
+});
+
+document.addEventListener("keydown", e => {
+  if (e.key !== "Escape") return;
+  if ($("#settings").classList.contains("open")) hide("#settings");
+  else if ($("#editor").classList.contains("open")) cancelEditor();
+  else if ($("#detail").classList.contains("open")) closeDetail();
+});
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && CFG) sync(); });
+window.addEventListener("online", () => { if (CFG) sync(); });
+
+/* ================= setup ================= */
+$("#setup-form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const msg = $("#setup-msg"), go = $("#setup-go");
+  const repoFull = $("#setup-repo").value.trim().replace(/^https?:\/\/github\.com\//, "").replace(/\.git$/, "").replace(/\/+$/, "");
+  const token = $("#setup-token").value.trim();
+  const m = repoFull.match(/^([A-Za-z0-9-]+)\/([A-Za-z0-9._-]+)$/);
+  if (!m) { msg.textContent = "Enter the repository as username/spec-book-data."; return; }
+  if (!token) { msg.textContent = "Paste your token."; return; }
+  const cfg = { owner: m[1], repo: m[2], token };
+  go.disabled = true; msg.textContent = "Checking with GitHub…";
+  try {
+    const repo = await checkRepo(cfg);
+    CFG = cfg; store.setJSON("cfg", CFG);
+    if (repo.private === false) toast("Heads up: that repository is public, so anyone can see your specs.");
+    msg.textContent = "";
+    startApp();
+  } catch (err) {
+    msg.textContent = err.kind === "offline" ? "You’re offline. Connect and try again." : (err.message || "That didn’t work. Try again.");
+  } finally { go.disabled = false; }
+});
+
+function startApp() {
+  $("#setup-screen").hidden = true;
+  $("#main-screen").hidden = false;
+  base = store.getJSON("base");
+  ops = store.getJSON("ops") || [];
+  S.loaded = !!base;
+  recompute();
+  sync();
+}
+
+/* ================= boot ================= */
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+if (CFG && CFG.token) startApp();
+else {
+  const host = location.hostname;
+  if (host.endsWith(".github.io")) $("#setup-repo").value = host.split(".")[0] + "/spec-book-data";
+  $("#setup-screen").hidden = false;
+  renderAll();
+}
+})();
+</script>
+</body>
+</html>
